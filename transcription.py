@@ -15,15 +15,13 @@ from sys import platform
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="small", help="Model to use",
+    parser.add_argument("--model", default="medium", help="Model to use",
                         choices=["tiny", "base", "small", "medium", "large"])
-    parser.add_argument("--non_english", action='store_true',
-                        help="Don't use the english model.")
     parser.add_argument("--energy_threshold", default=100,
                         help="Energy level for mic to detect.", type=int)
-    parser.add_argument("--record_timeout", default=2,
+    parser.add_argument("--record_timeout", default=1,
                         help="How real time the recording is in seconds.", type=float)
-    parser.add_argument("--phrase_timeout", default=2,
+    parser.add_argument("--phrase_timeout", default=1,
                         help="How much empty space between recordings before we "
                              "consider it a new line in the transcription.", type=float)
     if 'linux' in platform:
@@ -60,9 +58,7 @@ def main():
         source = sr.Microphone(sample_rate=16000)
 
     # Load / Download model
-    model = args.model
-    if args.model != "large" and not args.non_english:
-        model = model + ".en"
+    model = args.model+".en"
     audio_model = whisper.load_model(model)
 
     record_timeout = args.record_timeout
