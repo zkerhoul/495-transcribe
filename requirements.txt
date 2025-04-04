@@ -1,0 +1,8 @@
+python version used:=
+    python 3.12
+installs needed:=
+    pip install git+https://github.com/openai/whisper.git 
+    brew install portaudio
+    pip install pyaudio
+    pip install numpy
+    pip install speech_recognizer
