@@ -6,7 +6,7 @@ from datetime import datetime
 # Configuration
 PDF_FOLDER = "save_pdf"  # Folder containing lecture transcriptions
 NOTES_FOLDER = "lecture_notes"  # Output folder for study notes
-GEMINI_API_KEY = "AIzaSyDdqpWRbNrHIfrpJbksYEdCGVeo6R_xBJw"  # Removed API key as requested
+GEMINI_API_KEY = ""  # Removed API key as requested #TODO: insert api key here
 MODEL_NAME = "gemini-1.5-flash"  # Model to use
 
 def initialize_client():
