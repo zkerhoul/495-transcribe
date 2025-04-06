@@ -3,14 +3,13 @@ import numpy as np
 import speech_recognition as sr
 import whisper
 import torch
-
 from datetime import datetime, timedelta
 from queue import Queue
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
 import asyncio
 import threading
+from fpdf import FPDF  # For PDF generation
 
 # FastAPI setup
 app = FastAPI()
@@ -40,15 +39,29 @@ phrase_time = None
 data_queue = Queue()
 transcription = ['']
 
-# Thread-safe audio callback
+# Create save_pdf directory if it doesn't exist
+if not os.path.exists("save_pdf"):
+    os.makedirs("save_pdf")
 
+def save_to_pdf(text):
+    """Save the transcription text to a PDF file with current datetime as filename"""
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    
+    # Split text into lines and add to PDF
+    for line in text.split('\n'):
+        pdf.cell(200, 10, txt=line, ln=1)
+    
+    # Generate filename with current datetime
+    filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".pdf"
+    filepath = os.path.join("save_pdf", filename)
+    pdf.output(filepath)
+    print(f"Transcription saved to {filepath}")
 
 def record_callback(_, audio: sr.AudioData) -> None:
     data = audio.get_raw_data()
     data_queue.put(data)
-
-# Background transcription thread
-
 
 def transcription_loop():
     global phrase_time
@@ -76,6 +89,8 @@ def transcription_loop():
 
             if phrase_complete:
                 transcription.append(text)
+                # Save to PDF when a phrase is complete
+                save_to_pdf("\n".join(transcription))
             else:
                 transcription[-1] += text
 
@@ -84,9 +99,6 @@ def transcription_loop():
 
         else:
             asyncio.run(asyncio.sleep(0.25))
-
-# WebSocket endpoint
-
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
