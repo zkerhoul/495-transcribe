@@ -20,8 +20,6 @@ cleanup() {
 
     # Deactivate and remove virtual environment
     deactivate
-    echo "Removing virtual environment..."
-    rm -rf .venv
 
     exit 0
 }
