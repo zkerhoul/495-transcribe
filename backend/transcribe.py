@@ -89,8 +89,6 @@ def transcription_loop():
 
             if phrase_complete:
                 transcription.append(text)
-                # Save to PDF when a phrase is complete
-                save_to_pdf("\n".join(transcription))
             else:
                 transcription[-1] += text
 
