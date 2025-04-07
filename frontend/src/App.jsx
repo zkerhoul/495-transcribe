@@ -1,27 +1,69 @@
 import { useEffect, useRef, useState } from "react";
+import jsPDF from "jspdf";
 
 export default function TranscriptionApp() {
-  // State to store the full transcription text
   const [transcription, setTranscription] = useState("");
-  // Set of words the user has clicked (highlighted)
   const [highlightedWords, setHighlightedWords] = useState(new Set());
-  // Currently selected word for definition
   const [selectedWord, setSelectedWord] = useState(null);
-  // Definition for the selected word
   const [definition, setDefinition] = useState("");
-  // WebSocket reference
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const ws = useRef(null);
 
-  // Connect to the WebSocket server on component mount
-  useEffect(() => {
-    ws.current = new WebSocket("ws://localhost:8000/ws");
-    ws.current.onmessage = (event) => {
-      setTranscription(event.data); // Update transcription from backend
-    };
-    return () => ws.current.close(); // Cleanup on unmount
-  }, []);
+  const connectWebSocket = async () => {
+    try {
+      await fetch("http://localhost:8000/reset", { method: "POST" });
+    } catch (error) {
+      console.error("Failed to reset backend transcription:", error);
+    }
 
-  // Toggle highlight on a word and fetch its definition
+    const socket = new WebSocket("ws://localhost:8000/ws");
+
+    socket.onopen = () => {
+      console.log("WebSocket connection opened");
+      setIsTranscribing(true);
+      setTranscription("");
+    };
+
+    socket.onmessage = (event) => {
+      setTranscription(event.data);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket connection closed");
+      setIsTranscribing(false);
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      setIsTranscribing(false);
+    };
+
+    ws.current = socket;
+  };
+
+  const startTranscription = () => {
+    setTranscription("");
+    setHighlightedWords(new Set());
+    setSelectedWord(null);
+    setDefinition("");
+
+    if (!ws.current || ws.current.readyState >= WebSocket.CLOSING) {
+      connectWebSocket();
+    }
+  };
+
+  const stopTranscription = () => {
+    if (ws.current) {
+      ws.current.close();
+      ws.current = null;
+      saveTranscriptAsPDF();
+      setTranscription("");
+      setHighlightedWords(new Set());
+      setSelectedWord(null);
+      setDefinition("");
+    }
+  };
+
   const toggleHighlight = (word) => {
     setHighlightedWords((prev) => {
       const copy = new Set(prev);
@@ -30,63 +72,87 @@ export default function TranscriptionApp() {
       return copy;
     });
 
-    // Set selected word and get its definition
     setSelectedWord(word);
     fetchDefinition(word);
   };
 
-  // Placeholder for fetching a real definition
   const fetchDefinition = async (word) => {
-    setDefinition(`Definition for "${word}" goes here.`);
+    try {
+      const res = await fetch(
+        `http://localhost:8000/define?word=${encodeURIComponent(word)}`
+      );
+      const data = await res.json();
+      setDefinition(data.definition);
+    } catch (error) {
+      console.error("Failed to fetch definition:", error);
+      setDefinition("Sorry, no definition available.");
+    }
   };
 
-  // Function to render the transcribed text
+  const saveTranscriptAsPDF = () => {
+    const doc = new jsPDF();
+    const cleaned = transcription.replace(/\s+/g, " ").trim();
+    const lines = doc.splitTextToSize(cleaned, 180);
+    doc.text(lines, 10, 10);
+    doc.save("transcript.pdf");
+  };
+
   const renderText = () => {
-    // Split the transcription into words and spaces (\s+ captures all whitespace)
     return transcription.split(/(\s+)/).map((word, idx) => {
       const cleanWord = word.trim();
-      const isWord = /\w+/.test(cleanWord); // Check if the chunk is a word
-      const isHighlighted = highlightedWords.has(cleanWord); // Check highlight status
+      const isWord = /\w+/.test(cleanWord);
+      const isHighlighted = highlightedWords.has(cleanWord);
 
-      // If it's a word, make it clickable and stylable
       return isWord ? (
         <span
           key={idx}
           onClick={() => toggleHighlight(cleanWord)}
           style={{
-            backgroundColor: isHighlighted ? "#facc15" : "transparent", // Yellow highlight if selected
-            cursor: "pointer", // Pointer cursor to indicate interactivity
+            color: isHighlighted ? "#7e22ce" : "inherit",
+            cursor: "pointer",
             position: "relative",
           }}
         >
           {word}
         </span>
       ) : (
-        // If it's just whitespace or punctuation, render it normally
         <span key={idx}>{word}</span>
       );
     });
   };
 
   return (
-    <div className="p-4 max-w-2xl mx-auto text-lg leading-relaxed">
-      <h1 className="text-2xl font-bold mb-4">Live Transcription</h1>
+    <div className="max-w-2xl mx-auto text-lg leading-relaxed px-4 pt-2">
+      <header className="sticky top-0 z-10 bg-white pb-2 pt-2">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold">Live Transcription</h1>
+          <div className="flex gap-2">
+            <button
+              onClick={startTranscription}
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+              disabled={isTranscribing}
+            >
+              Start
+            </button>
+            <button
+              onClick={stopTranscription}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+              disabled={!isTranscribing}
+            >
+              Stop & Save PDF
+            </button>
+          </div>
+        </div>
+      </header>
 
-      {/* Display the transcribed words */}
-      <div className="whitespace-pre-wrap bg-gray-100 p-4 rounded-xl shadow-md relative">
+      <div className="mt-2 whitespace-pre-wrap bg-gray-100 p-4 rounded-xl shadow-md relative min-h-[150px]">
         {renderText()}
-
-        {/* Display definition box if a word is selected */}
         {selectedWord && definition && (
           <div className="absolute top-0 left-full ml-4 w-64 p-2 bg-white border rounded-lg shadow-xl text-sm z-10">
             <strong>{selectedWord}</strong>: {definition}
           </div>
         )}
       </div>
-
-      <p className="mt-4 text-sm text-gray-500">
-        Click on a word to highlight it and see a definition.
-      </p>
     </div>
   );
 }
