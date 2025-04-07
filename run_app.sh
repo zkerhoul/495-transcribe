@@ -3,13 +3,13 @@
 # Create virtual environment if it doesn't exist
 if [ ! -d ".venv" ]; then
     echo "Creating virtual environment..."
-    python -m venv .venv  
+    python3 -m venv env/ 
 else
     echo "Using existing virtual environment..."
 fi
 
 # Activate virtual environment
-source .venv/bin/activate  
+source env/bin/activate  
 
 # Function to clean up on exit or interrupt
 cleanup() {
