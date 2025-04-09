@@ -1,9 +1,19 @@
 #!/bin/bash
 
 # Create virtual environment if it doesn't exist
-if [ ! -d ".venv" ]; then
+if [ ! -d "env" ]; then
     echo "Creating virtual environment..."
-    python3 -m venv env/ 
+    python3 -m venv env/
+
+    # Activate virtual environment
+    source env/bin/activate
+
+    # Install backend requirements
+    echo "Installing backend Python dependencies..."
+    pip install --upgrade pip
+    pip install -r backend/requirements.txt
+
+    deactivate
 else
     echo "Using existing virtual environment..."
 fi
@@ -18,7 +28,7 @@ cleanup() {
     # Kill background processes
     kill $BACK_PID $FRONT_PID 2>/dev/null
 
-    # Deactivate and remove virtual environment
+    # Deactivate virtual environment
     deactivate
 
     exit 0
