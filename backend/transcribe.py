@@ -13,7 +13,7 @@ import asyncio
 import threading
 from fpdf import FPDF  # For PDF generation
 
-from define import get_definition
+from define import get_definition, get_notes
 
 # Configure Gemini API client
 gemini_client = genai.Client(api_key="AIzaSyDdqpWRbNrHIfrpJbksYEdCGVeo6R_xBJw")
@@ -132,6 +132,13 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.get("/define")
 async def define(word: str = Query(...)):
     return {"definition": get_definition(word)}
+
+# GET endpoint to fetch notes
+
+
+@app.get("/notes")
+async def notes(transcript: str = Query(...)):
+    return {"notes": get_notes(transcript)}
 
 # POST endpoint to reset transcription
 

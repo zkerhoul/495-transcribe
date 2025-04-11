@@ -57,6 +57,7 @@ export default function TranscriptionApp() {
       ws.current.close();
       ws.current = null;
       saveTranscriptAsPDF();
+      fetchNotes();
       setTranscription("");
       setHighlightedWords(new Set());
       setSelectedWord(null);
@@ -89,12 +90,40 @@ export default function TranscriptionApp() {
     }
   };
 
+  const fetchNotes = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/notes?transcript=${encodeURIComponent(
+          transcription
+        )}`
+      );
+      const data = await res.json();
+
+      if (data.notes) {
+        saveNotesAsPDF(notes);
+        console.log("Notes:", data.notes);
+      } else {
+        console.error("No notes received.");
+      }
+    } catch (error) {
+      console.error("Failed to fetch notes:", err);
+    }
+  };
+
   const saveTranscriptAsPDF = () => {
     const doc = new jsPDF();
     const cleaned = transcription.replace(/\s+/g, " ").trim();
     const lines = doc.splitTextToSize(cleaned, 180);
     doc.text(lines, 10, 10);
     doc.save("transcript.pdf");
+  };
+
+  const saveNotesAsPDF = (notes) => {
+    const doc = new jsPDF();
+    const cleaned = notes.replace(/\s+/g, " ").trim();
+    const lines = doc.splitTextToSize(cleaned, 180);
+    doc.text(lines, 10, 10);
+    doc.save("notes.pdf");
   };
 
   const renderText = () => {

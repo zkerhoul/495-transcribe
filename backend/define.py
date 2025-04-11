@@ -43,3 +43,17 @@ def get_definition(word: str) -> str:
         print("Gemini error:", e)
         response = "Sorry, I couldn't define that word right now."
         return response.text.strip()
+    
+def get_notes(transcript: str) -> str:
+    transcript = transcript.strip()
+
+    prompt = f"Provide notes for the following transcript: \"{transcript}\"."
+
+    try:
+        response = chat_session.send_message(prompt)
+        notes = response.text.strip()
+        return notes
+    except Exception as e:
+        print("Gemini error:", e)
+        response = "Sorry, I couldn't generate notes right now."
+        return response.text.strip()
