@@ -25,6 +25,7 @@ chat_session = model.start_chat(
     ]
 )
 
+
 def get_definition(word: str) -> str:
     word = word.lower().strip()
 
@@ -43,11 +44,12 @@ def get_definition(word: str) -> str:
         print("Gemini error:", e)
         response = "Sorry, I couldn't define that word right now."
         return response.text.strip()
-    
+
+
 def get_notes(transcript: str) -> str:
     transcript = transcript.strip()
 
-    prompt = f"Provide notes for the following transcript: \"{transcript}\"."
+    prompt = f"Provide notes for the following transcript: \"{transcript}\". Don't use any text formatting (bold, italics, etc.) except for separating unique ideas into paragraphs"
 
     try:
         response = chat_session.send_message(prompt)

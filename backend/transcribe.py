@@ -7,11 +7,10 @@ import torch
 from google import genai
 from datetime import datetime, timedelta
 from queue import Queue
-from fastapi import FastAPI, WebSocket, Query
+from fastapi import FastAPI, WebSocket, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import threading
-from fpdf import FPDF  # For PDF generation
 
 from define import get_definition, get_notes
 
@@ -45,27 +44,6 @@ phrase_time = None
 
 data_queue = Queue()
 transcription = ['']
-
-# Create save_pdf directory if it doesn't exist
-if not os.path.exists("save_pdf"):
-    os.makedirs("save_pdf")
-
-
-def save_to_pdf(text):
-    """Save the transcription text to a PDF file with current datetime as filename"""
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
-
-    # Split text into lines and add to PDF
-    for line in text.split('\n'):
-        pdf.cell(200, 10, txt=line, ln=1)
-
-    # Generate filename with current datetime
-    filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".pdf"
-    filepath = os.path.join("save_pdf", filename)
-    pdf.output(filepath)
-    print(f"Transcription saved to {filepath}")
 
 
 def record_callback(_, audio: sr.AudioData) -> None:
@@ -133,12 +111,15 @@ async def websocket_endpoint(websocket: WebSocket):
 async def define(word: str = Query(...)):
     return {"definition": get_definition(word)}
 
-# GET endpoint to fetch notes
+# POST endpoint to fetch notes
 
 
-@app.get("/notes")
-async def notes(transcript: str = Query(...)):
-    return {"notes": get_notes(transcript)}
+@app.post("/notes")
+async def notes(request: Request):
+    body = await request.json()
+    transcription = body.get("transcription")
+    notes = get_notes(transcription)
+    return {"notes": notes}
 
 # POST endpoint to reset transcription
 

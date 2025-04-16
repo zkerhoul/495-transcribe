@@ -92,16 +92,17 @@ export default function TranscriptionApp() {
 
   const fetchNotes = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:8000/notes?transcript=${encodeURIComponent(
-          transcription
-        )}`
-      );
+      const res = await fetch("http://localhost:8000/notes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ transcription }),
+      });
       const data = await res.json();
 
       if (data.notes) {
-        saveNotesAsPDF(notes);
-        console.log("Notes:", data.notes);
+        saveNotesAsPDF(data.notes);
       } else {
         console.error("No notes received.");
       }
@@ -120,8 +121,8 @@ export default function TranscriptionApp() {
 
   const saveNotesAsPDF = (notes) => {
     const doc = new jsPDF();
-    const cleaned = notes.replace(/\s+/g, " ").trim();
-    const lines = doc.splitTextToSize(cleaned, 180);
+    // const cleaned = notes.replace(/\s+/g, " ").trim();
+    const lines = doc.splitTextToSize(notes, 180);
     doc.text(lines, 10, 10);
     doc.save("notes.pdf");
   };
