@@ -1,3 +1,4 @@
+from fastapi import Form
 import os
 import numpy as np
 import speech_recognition as sr
@@ -7,7 +8,7 @@ import torch
 from google import genai
 from datetime import datetime, timedelta
 from queue import Queue
-from fastapi import FastAPI, WebSocket, Query, Request
+from fastapi import FastAPI, WebSocket, Query, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import threading
@@ -132,5 +133,33 @@ async def reset_transcription():
         transcription_queue.queue.clear()
     return {"message": "Transcription reset."}
 
+# GET endpoint to list microphones
+
+
+@app.get("/list_microphones")
+async def list_microphones():
+    return {"devices": sr.Microphone.list_microphone_names()}
+
+# POST endpoint to set microphone
+
+
+@app.post("/set_microphone")
+async def set_microphone(device_index: int = Form(...)):
+    global source
+    try:
+        mic_list = sr.Microphone.list_microphone_names()
+        if device_index < 0 or device_index >= len(mic_list):
+            return {"error": "Invalid microphone index."}
+
+        source = sr.Microphone(sample_rate=16000, device_index=device_index)
+        print(f"Switched to microphone: {mic_list[device_index]}")
+        return {"message": f"Microphone set to: {mic_list[device_index]}"}
+    except Exception as e:
+        return {"error": str(e)}
+
 # Start background transcription thread
 threading.Thread(target=transcription_loop, daemon=True).start()
+
+
+
+
