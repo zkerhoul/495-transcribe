@@ -11,6 +11,21 @@ export default function TranscriptionApp() {
   const [selectedMic, setSelectedMic] = useState(null);
   const ws = useRef(null);
 
+  // Using default web light mode colors
+  const colors = {
+    bg: "#ffffff",
+    text: "#000000",
+    primary: "#0000ee",       // Standard link blue
+    buttonStart: "#228b22",   // Forest green
+    buttonStop: "#b22222",    // Firebrick red
+    panelBg: "#f8f8f8",       // Slightly off-white
+    border: "#dddddd",
+    headerBg: "#ffffff",
+    shadow: "rgba(0, 0, 0, 0.1)",
+    selectBg: "#ffffff",
+    highlight: "#551a8b"      // Purple for highlights
+  };
+
   useEffect(() => {
     const fetchMicrophones = async () => {
       try {
@@ -172,7 +187,7 @@ export default function TranscriptionApp() {
           key={idx}
           onClick={() => toggleHighlight(cleanWord)}
           style={{
-            color: isHighlighted ? "#7e22ce" : "inherit",
+            color: isHighlighted ? colors.highlight : "inherit",
             cursor: "pointer",
             position: "relative",
           }}
@@ -193,6 +208,8 @@ export default function TranscriptionApp() {
         padding: "1rem",
         fontSize: "1.125rem",
         lineHeight: "1.75rem",
+        backgroundColor: colors.bg,
+        color: colors.text,
       }}
     >
       <header
@@ -200,10 +217,10 @@ export default function TranscriptionApp() {
           position: "sticky",
           top: 0,
           zIndex: 10,
-          backgroundColor: "white",
+          backgroundColor: colors.headerBg,
           padding: "0.5rem 0",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-          borderBottom: "1px solid #e5e7eb",
+          boxShadow: `0 1px 3px ${colors.shadow}`,
+          borderBottom: `1px solid ${colors.border}`,
         }}
       >
         <div
@@ -216,7 +233,7 @@ export default function TranscriptionApp() {
           }}
         >
           <h1 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
-            Live Transcription
+            LexiCaption
           </h1>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <button
@@ -224,7 +241,7 @@ export default function TranscriptionApp() {
               disabled={isTranscribing}
               style={{
                 padding: "0.5rem 1rem",
-                backgroundColor: "#16a34a",
+                backgroundColor: colors.buttonStart,
                 color: "white",
                 borderRadius: "0.375rem",
                 opacity: isTranscribing ? 0.5 : 1,
@@ -237,7 +254,7 @@ export default function TranscriptionApp() {
               disabled={!isTranscribing}
               style={{
                 padding: "0.5rem 1rem",
-                backgroundColor: "#dc2626",
+                backgroundColor: colors.buttonStop,
                 color: "white",
                 borderRadius: "0.375rem",
                 opacity: !isTranscribing ? 0.5 : 1,
@@ -256,9 +273,10 @@ export default function TranscriptionApp() {
                 onChange={(e) => setMicrophone(Number(e.target.value))}
                 style={{
                   padding: "0.25rem 0.5rem",
-                  border: "1px solid #d1d5db",
+                  border: `1px solid ${colors.border}`,
                   borderRadius: "0.375rem",
-                  backgroundColor: "white",
+                  backgroundColor: colors.selectBg,
+                  color: colors.text,
                 }}
               >
                 {micList.map((label, idx) => (
@@ -276,10 +294,10 @@ export default function TranscriptionApp() {
         <div
           style={{
             marginTop: "0.5rem",
-            backgroundColor: "#f3f4f6",
+            backgroundColor: colors.panelBg,
             padding: "1rem",
             borderRadius: "0.75rem",
-            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+            boxShadow: `0 1px 3px ${colors.shadow}`,
             minHeight: "150px",
             whiteSpace: "pre-wrap",
             maxHeight: "400px",
@@ -297,10 +315,10 @@ export default function TranscriptionApp() {
               right: "-18rem",
               width: "16rem",
               padding: "0.5rem",
-              backgroundColor: "white",
-              border: "1px solid #d1d5db",
+              backgroundColor: colors.panelBg,
+              border: `1px solid ${colors.border}`,
               borderRadius: "0.5rem",
-              boxShadow: "0 10px 15px rgba(0, 0, 0, 0.1)",
+              boxShadow: `0 10px 15px ${colors.shadow}`,
               fontSize: "0.875rem",
               zIndex: 10,
             }}
