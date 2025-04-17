@@ -186,31 +186,80 @@ export default function TranscriptionApp() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto text-lg leading-relaxed px-4 pt-2">
-      <header className="sticky top-0 z-10 bg-white pb-2 pt-2 shadow-md border-b">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold">Live Transcription</h1>
-          <div className="flex gap-2 items-center">
+    <div
+      style={{
+        maxWidth: "768px",
+        margin: "0 auto",
+        padding: "1rem",
+        fontSize: "1.125rem",
+        lineHeight: "1.75rem",
+      }}
+    >
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          backgroundColor: "white",
+          padding: "0.5rem 0",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          borderBottom: "1px solid #e5e7eb",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+          }}
+        >
+          <h1 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+            Live Transcription
+          </h1>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <button
               onClick={startTranscription}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
               disabled={isTranscribing}
+              style={{
+                padding: "0.5rem 1rem",
+                backgroundColor: "#16a34a",
+                color: "white",
+                borderRadius: "0.375rem",
+                opacity: isTranscribing ? 0.5 : 1,
+              }}
             >
               Start
             </button>
             <button
               onClick={stopTranscription}
-              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
               disabled={!isTranscribing}
+              style={{
+                padding: "0.5rem 1rem",
+                backgroundColor: "#dc2626",
+                color: "white",
+                borderRadius: "0.375rem",
+                opacity: !isTranscribing ? 0.5 : 1,
+              }}
             >
               Stop & Save PDF
             </button>
-            <div className="flex items-center gap-1">
-              <label className="text-sm font-medium mr-1">Mic:</label>
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}
+            >
+              <label style={{ fontSize: "0.875rem", fontWeight: 500 }}>
+                Mic:
+              </label>
               <select
                 value={selectedMic ?? ""}
                 onChange={(e) => setMicrophone(Number(e.target.value))}
-                className="px-2 py-1 border border-gray-300 rounded bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{
+                  padding: "0.25rem 0.5rem",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "0.375rem",
+                  backgroundColor: "white",
+                }}
               >
                 {micList.map((label, idx) => (
                   <option key={idx} value={idx}>
@@ -223,10 +272,39 @@ export default function TranscriptionApp() {
         </div>
       </header>
 
-      <div className="mt-2 whitespace-pre-wrap bg-gray-100 p-4 rounded-xl shadow-md relative min-h-[150px]">
-        {renderText()}
+      <div style={{ position: "relative" }}>
+        <div
+          style={{
+            marginTop: "0.5rem",
+            backgroundColor: "#f3f4f6",
+            padding: "1rem",
+            borderRadius: "0.75rem",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+            minHeight: "150px",
+            whiteSpace: "pre-wrap",
+            maxHeight: "400px",
+            overflowY: "auto",
+          }}
+        >
+          {renderText()}
+        </div>
+
         {selectedWord && definition && (
-          <div className="absolute top-0 left-full ml-4 w-64 p-2 bg-white border rounded-lg shadow-xl text-sm z-10">
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              right: "-18rem",
+              width: "16rem",
+              padding: "0.5rem",
+              backgroundColor: "white",
+              border: "1px solid #d1d5db",
+              borderRadius: "0.5rem",
+              boxShadow: "0 10px 15px rgba(0, 0, 0, 0.1)",
+              fontSize: "0.875rem",
+              zIndex: 10,
+            }}
+          >
             <strong>{selectedWord}</strong>: {definition}
           </div>
         )}
