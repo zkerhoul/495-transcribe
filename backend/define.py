@@ -1,7 +1,7 @@
 import google.generativeai as genai
 
 # Configure the Gemini client
-genai.configure(api_key="AIzaSyDdqpWRbNrHIfrpJbksYEdCGVeo6R_xBJw")
+genai.configure(api_key=) #insert api key here
 
 # Simple in-memory cache
 definition_cache = {}
