@@ -16,7 +16,7 @@ import threading
 from define import get_definition, get_notes
 
 # Configure Gemini API client
-gemini_client = genai.Client(api_key="AIzaSyDdqpWRbNrHIfrpJbksYEdCGVeo6R_xBJw")
+gemini_client = genai.Client(api_key= )#insert key here
 
 # FastAPI setup
 app = FastAPI()
